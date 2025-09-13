@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
@@ -20,10 +21,19 @@
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
+    "json2csv": "^6.0.0-alpha.2",
     "mysql2": "^3.14.5",
     "node-fetch": "^3.3.2",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Archit-Dubey-005/Quantam_Stack.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Archit-Dubey-005/Quantam_Stack/issues"
+  },
+  "homepage": "https://github.com/Archit-Dubey-005/Quantam_Stack#readme"
 }

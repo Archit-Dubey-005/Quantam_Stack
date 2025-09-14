@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Power Prediction Platform - Predict</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body, * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d); padding:20px; min-height:100vh; }
+        .container { max-width: 900px; margin: 0 auto; background: rgba(255,255,255,0.95); border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);}
+        h1 { text-align:center; color:#1a2a6c; margin-bottom: 10px; }
+        .subtitle { text-align:center; margin-bottom:20px; color:#666; }
+        form { display:flex; flex-direction:column; gap:15px; }
+        label { font-weight:bold; }
+        input[type=text], input[type=number], input[type=range] { width:100%; padding:8px; border-radius:5px; border:1px solid #ccc; }
+        .range-value { font-weight:bold; text-align:right; margin-top:5px; }
+        button { background:#1a2a6c; color:white; border:none; padding:12px; border-radius:10px; font-size:16px; cursor:pointer; transition:0.3s; }
+        button:hover { background:#fdbb2d; color:#1a2a6c; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <div class="container" style="border:black solid 2px;">
+       <div style="border: black solid 2px;border-radius: 10%;">
+        <h1>Predict Solar Power</h1>
+    </div> 
+        <p class="subtitle">Enter your solar system details and location</p>
+        <form id="predictForm">
+            <label>Location (City)</label>
+            <input type="text" id="city" placeholder="San Francisco" required>
+
+            <label>Number of Panels</label>
+            <input type="number" id="numPanels" min="1" max="100" value="10">
+
+            <label>Panel Area (m²)</label>
+            <input type="number" id="panelArea" min="0.5" max="5" step="0.1" value="1.6">
+
+            <label>Panel Efficiency (%)</label>
+            <input type="number" id="panelEfficiency" min="0.1" max="1" step="0.01" value="0.18">
+
+            <label>Inverter Efficiency (%)</label>
+            <input type="number" id="inverterEfficiency" min="0.1" max="1" step="0.01" value="0.95">
+
+            <label>Tilt Angle (°)</label>
+            <input type="number" id="tilt" min="0" max="90" step="1" value="30">
+
+            <label>Azimuth Angle (°)</label>
+            <input type="number" id="azimuth" min="0" max="360" step="1" value="180">
+
+            <button href="./RESULT.html" type="submit" id="predict-btn"><i class="fas fa-brain"></i> Generate AI Prediction</button>
+        </form>
+
+    </div>
+
+    <script>
+        document.getElementById('predictForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                location: document.getElementById('city').value,
+                numPanels: parseFloat(document.getElementById('numPanels').value),
+                panelArea: parseFloat(document.getElementById('panelArea').value),
+                panelEfficiency: parseFloat(document.getElementById('panelEfficiency').value),
+                inverterEfficiency: parseFloat(document.getElementById('inverterEfficiency').value),
+                tilt: parseFloat(document.getElementById('tilt').value),
+                azimuth: parseFloat(document.getElementById('azimuth').value)
+            };
+            try {
+                const btn = document.getElementById('predict-btn');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+                const res = await fetch('http://localhost:3001/api/predict/16days', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    // alert(`Prediction successful! CSV URL: ${data.downloadUrl}`);
+                    localStorage.setItem('lastPrediction', JSON.stringify(data));
+                     window.location.href = "/RESULT";
+                }
+                else {
+                    alert(`Error: ${data.error}`);
+                }
+            } catch(err) {
+                alert('Failed: ' + err.message);
+            } finally {
+                const btn = document.getElementById('predict-btn');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-brain"></i> Generate AI Prediction';
+            }
+        });
+        
+
+document.getElementById('downloadBtn').addEventListener('click', () => {
+    const lastPrediction = JSON.parse(localStorage.getItem('lastPrediction'));
+    if (!lastPrediction) return alert("No prediction data found. Please run PREDICT first.");
+    const url = lastPrediction.downloadUrl;
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = url.split('/').pop();
+    link.click();
+});
+
+    </script>
+</body>
+</html>

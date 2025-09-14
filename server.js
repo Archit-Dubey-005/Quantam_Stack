@@ -16,6 +16,11 @@ app.use(express.json());
 app.use(express.static(path.join(process.cwd(), "public"))); // serve static files
 
 const PORT = 3001;
+// Serve HTML views
+app.get("/", (req, res) => res.sendFile(path.join(__dirname, "view", "PREDICT.html")));
+app.get("/RESULT", (req, res) => res.sendFile(path.join(__dirname, "view", "RESULT.html")));
+app.get("/EXPORT", (req, res) => res.sendFile(path.join(__dirname, "view", "EXPORT.html")));
+
 
 // ----------------- helpers -----------------
 function deg2rad(d) {
@@ -115,7 +120,7 @@ app.post("/api/predict/16days", async (req, res) => {
 
     // compute hourly energy
     const hourlyResults = forecast.time.map((t, i) => ({
-      time: t,
+      Date: t+":00",
       ghi_W_m2: forecast.ghi[i],
       temp_C: forecast.temp[i],
       ac_kWh: calculateHourlyEnergy({
@@ -135,7 +140,7 @@ app.post("/api/predict/16days", async (req, res) => {
     }));
 
     // convert to CSV
-    const fields = ["time", "ghi_W_m2", "temp_C", "ac_kWh"];
+    const fields = ["Date", "ghi_W_m2", "temp_C", "ac_kWh"];
     const parser = new Parser({ fields });
     const csv = parser.parse(hourlyResults);
 
@@ -164,6 +169,6 @@ app.get("/baseline-16day", (req, res) => {
 });
 
 // ----------------- start server -----------------
-app.listen(PORT, () => {
-  console.log(`Solar server running at http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running at http://0.0.0.0:${PORT}`);
 });

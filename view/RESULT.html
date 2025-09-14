@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prediction Results</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    body, * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+    body { background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d); padding:20px; min-height:100vh; }
+    .container { max-width:1200px; margin:0 auto; background: rgba(255,255,255,0.95); border-radius:15px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.2);}
+    h1 { text-align:center; color:#1a2a6c; margin-bottom:20px; }
+    .dashboard { display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px; }
+    .card { background:white; padding:20px; border-radius:12px; flex:1; text-align:center; box-shadow:0 5px 15px rgba(0,0,0,0.1);}
+    .card h3 { font-size:1rem; color:#444; margin-bottom:10px; }
+    .value { font-size:2rem; font-weight:bold; color:#1a2a6c; }
+    canvas { width:100%; height:500px; }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Solar Prediction Results</h1>
+    <div class="dashboard">
+        <div class="card">
+            <h3>Total 16-Day Output</h3>
+            <div class="value" id="totalOutput">0</div>
+            <div>kWh</div>
+        </div>
+        <div class="card">
+            <h3>Optimal Tilt</h3>
+            <div class="value" id="optimalTilt">0</div>
+            <div>°</div>
+        </div>
+    </div>
+    <canvas id="productionChart"></canvas>
+</div>
+<!-- <div class="container">
+    <h1>Export Prediction CSV</h1>
+    <button id="downloadBtn"><i class="fas fa-file-csv"></i> Download CSV</button>
+</div> -->
+<div style="text-align:center; margin-top:30px;">
+    <button id="exportBtn" style="
+        background: #1a2a6c;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 12px;
+        font-size: 18px;
+        cursor: pointer;
+        transition: 0.3s;
+    ">
+        <i class="fas fa-file-csv"></i> Go to Export Page
+    </button>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const lastPrediction = JSON.parse(localStorage.getItem('lastPrediction'));
+    if (!lastPrediction) return alert("No prediction data found. Please run PREDICT first.");
+
+    // Update dashboard
+    const total = lastPrediction.hourly.reduce((sum,h)=>sum+h.ac_kWh,0).toFixed(1);
+    document.getElementById('totalOutput').textContent = total;
+    document.getElementById('optimalTilt').textContent = lastPrediction.site.tiltDeg.toFixed(1);
+
+    // Chart
+    const ctx = document.getElementById('productionChart').getContext('2d');
+    new Chart(ctx, {
+        type:'line',
+        data: {
+            labels:lastPrediction.hourly.map(h=>h.Date),
+            datasets:[{
+                label:'kWh Production',
+                data:lastPrediction.hourly.map(h=>h.ac_kWh),
+                backgroundColor:'rgba(52,152,219,0.2)',
+                borderColor:'rgba(52,152,219,1)',
+                fill:true,
+                tension:0.3
+            }]
+        },
+        options:{ responsive:true }
+    });
+});
+document.getElementById('exportBtn').addEventListener('click', () => {
+    // Redirect to EXPORT page
+    window.location.href = "/EXPORT";
+});
+// document.getElementById('downloadBtn').addEventListener('click', () => {
+//     const lastPrediction = JSON.parse(localStorage.getItem('lastPrediction'));
+//     if (!lastPrediction) return alert("No prediction data found. Please run PREDICT first.");
+//     const url = lastPrediction.downloadUrl;
+//     const link = document.createElement('a');
+//     link.href = url;
+//     link.download = url.split('/').pop();
+//     link.click();
+// });
+</script>
+</body>
+</html>

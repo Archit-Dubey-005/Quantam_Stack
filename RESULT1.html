@@ -332,7 +332,46 @@
      <script>
    
          document.addEventListener('DOMContentLoaded', function() {
-            // Data for different time periods
+            // Load prediction results from sessionStorage
+            const results = JSON.parse(sessionStorage.getItem('solarPredictionResults') || '{}');
+            
+            // Update dashboard with real data
+            if (results.forecast) {
+                document.querySelector('.card:nth-child(1) .value').textContent = results.forecast.dailyAverage.toFixed(1);
+                document.querySelector('.card:nth-child(4) .value').textContent = Math.round(results.forecast.totalKWh * 365 / 16);
+            }
+            
+            if (results.optimization) {
+                document.querySelector('.card:nth-child(2) .value').textContent = results.optimization.optimalTilt + '°';
+                document.querySelector('.card:nth-child(3) .value').textContent = '+' + results.optimization.efficiencyGain.toFixed(1) + '%';
+            }
+            
+            // Update recommendations with real data
+            if (results.recommendations && results.recommendations.length > 0) {
+                const recommendationsContainer = document.querySelector('.recommendations-card');
+                const existingRecommendations = recommendationsContainer.querySelectorAll('.recommendation');
+                
+                // Clear existing recommendations
+                existingRecommendations.forEach(rec => rec.remove());
+                
+                // Add real recommendations
+                results.recommendations.forEach((rec, index) => {
+                    const recDiv = document.createElement('div');
+                    recDiv.className = 'recommendation';
+                    recDiv.innerHTML = `
+                        <input type="checkbox" id="rec${index + 1}">
+                        <label for="rec${index + 1}">${rec}</label>
+                    `;
+                    recommendationsContainer.appendChild(recDiv);
+                });
+            }
+            
+            // Update chart with real hourly data
+            if (results.forecast && results.forecast.hourly) {
+                updateChartWithRealData(results.forecast.hourly);
+            }
+            
+            // Data for different time periods (fallback if no real data)
             const data = {
                 hourly: {
                     labels: ['6:00', '7:00', '8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'],
@@ -454,6 +493,26 @@
                 updateDashboard(firstPoint.index);
             }
         };
+        
+        // Function to update chart with real data
+        function updateChartWithRealData(hourlyData) {
+            // Process hourly data to create chart data
+            const labels = [];
+            const values = [];
+            
+            // Take first 24 hours for hourly view
+            const firstDay = hourlyData.slice(0, 24);
+            firstDay.forEach((hour, index) => {
+                const date = new Date(hour.timestamp);
+                labels.push(date.getHours() + ':00');
+                values.push(hour.ac_kWh);
+            });
+            
+            // Update chart data
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = values;
+            chart.update();
+        }
     </script> 
        
 </body>

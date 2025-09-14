@@ -246,7 +246,7 @@ Date,Output (kWh),Irradiance (W/m²),Temperature (°C)
 2025-09-06,40.1,465,29.5
 2025-09-07,37.9,445,28.3
                     </div>
-                    <a href="#" class="btn"><i class="fas fa-download"></i> Download CSV</a>
+                    <a href="#" class="btn" id="download-csv-btn"><i class="fas fa-download"></i> Download CSV</a>
                 </div>
             </div>
         </div>
@@ -255,5 +255,85 @@ Date,Output (kWh),Irradiance (W/m²),Temperature (°C)
             <p>QUANTUM STACK</p>
         </footer>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load prediction results from sessionStorage
+            const results = JSON.parse(sessionStorage.getItem('solarPredictionResults') || '{}');
+            
+            // Update the CSV preview with real data
+            if (results.forecast && results.forecast.hourly) {
+                updateCSVPreview(results.forecast.hourly);
+            }
+            
+            // Handle CSV download
+            document.getElementById('download-csv-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                downloadCSV(results);
+            });
+        });
+        
+        function updateCSVPreview(hourlyData) {
+            const csvPreview = document.querySelector('.csv-preview');
+            let csvContent = 'Date,Output (kWh),Irradiance (W/m²),Temperature (°C)\n';
+            
+            // Show first 7 days of data
+            const firstWeek = hourlyData.slice(0, 168); // 7 days * 24 hours
+            
+            // Group by day and sum hourly values
+            const dailyData = {};
+            firstWeek.forEach(hour => {
+                const date = new Date(hour.timestamp).toISOString().split('T')[0];
+                if (!dailyData[date]) {
+                    dailyData[date] = {
+                        output: 0,
+                        irradiance: 0,
+                        temperature: 0,
+                        count: 0
+                    };
+                }
+                dailyData[date].output += hour.ac_kWh;
+                dailyData[date].irradiance += hour.ghi_W_m2;
+                dailyData[date].temperature += hour.temp_C;
+                dailyData[date].count++;
+            });
+            
+            // Add daily rows to CSV
+            Object.keys(dailyData).forEach(date => {
+                const day = dailyData[date];
+                const avgIrradiance = (day.irradiance / day.count).toFixed(1);
+                const avgTemperature = (day.temperature / day.count).toFixed(1);
+                csvContent += `${date},${day.output.toFixed(2)},${avgIrradiance},${avgTemperature}\n`;
+            });
+            
+            csvPreview.textContent = csvContent;
+        }
+        
+        function downloadCSV(results) {
+            if (!results.forecast || !results.forecast.hourly) {
+                alert('No prediction data available. Please run a prediction first.');
+                return;
+            }
+            
+            // Create CSV content
+            let csvContent = 'Timestamp,Output (kWh),Irradiance (W/m²),Temperature (°C)\n';
+            
+            results.forecast.hourly.forEach(hour => {
+                const timestamp = new Date(hour.timestamp).toISOString();
+                csvContent += `${timestamp},${hour.ac_kWh.toFixed(4)},${hour.ghi_W_m2.toFixed(2)},${hour.temp_C.toFixed(2)}\n`;
+            });
+            
+            // Create and download file
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `solar_prediction_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+    </script>
 </body>
 </html>

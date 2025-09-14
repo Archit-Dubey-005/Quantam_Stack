@@ -378,15 +378,13 @@
     document.getElementById('predict-btn').addEventListener('click', async () => {
         // Collect all form data
         const formData = {
-            city: document.getElementById('city').value,
-            latitude: document.getElementById('latitude').value,
-            longitude: document.getElementById('longitude').value,
-            numPanels: document.getElementById('numPanels').value,
-            panelArea: document.getElementById('panelArea').value,
-            panelEfficiency: document.getElementById('panelEfficiency').value,
-            inverterEfficiency: document.getElementById('inverterEfficiency').value,
-            tilt: document.getElementById('tilt').value,
-            azimuth: document.getElementById('azimuth').value
+            location: document.getElementById('city').value,
+            numPanels: parseInt(document.getElementById('numPanels').value),
+            panelArea: parseFloat(document.getElementById('panelArea').value),
+            panelEfficiency: parseFloat(document.getElementById('panelEfficiency').value),
+            inverterEfficiency: parseFloat(document.getElementById('inverterEfficiency').value),
+            tilt: parseInt(document.getElementById('tilt').value),
+            azimuth: parseInt(document.getElementById('azimuth').value)
         };
         
         try {
@@ -408,12 +406,15 @@
             const result = await response.json();
             
             if (response.ok) {
-                // Display results (you'll need to implement this)
-                alert(`Prediction successful! Total energy: ${result.summary.totalKWh} kWh over 16 days`);
+                // Store results in sessionStorage for the results page
+                sessionStorage.setItem('solarPredictionResults', JSON.stringify(result));
+                
+                // Show success message
+                alert(`Prediction successful! Total energy: ${result.forecast.totalKWh} kWh over 16 days`);
                 console.log('Prediction results:', result);
                 
-                // In a real application, you would display these results on the page
-                // For now, we'll just show an alert
+                // Redirect to results page
+                window.location.href = './RESULT1.html';
             } else {
                 alert(`Error: ${result.error}`);
             }

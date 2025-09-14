@@ -1,0 +1,45 @@
+{
+  "model_name": "RandomForest",
+  "features": [
+    "ghi_w_m2",
+    "temperature_C",
+    "tilt_deg",
+    "azimuth_deg",
+    "num_panels",
+    "hour",
+    "day_of_year",
+    "month",
+    "is_weekend",
+    "solar_elevation",
+    "daylight_hours",
+    "system_capacity",
+    "tilt_efficiency",
+    "Solar_Radiation",
+    "Temperature"
+  ],
+  "training_date": "2025-09-14T14:03:36.882340",
+  "training_samples": 1184,
+  "test_samples": 296,
+  "performance": {
+    "mae": 0.019390177832792017,
+    "mse": 0.0008920888882420705,
+    "r2": 0.9795861785562634
+  },
+  "feature_importance": {
+    "ghi_w_m2": 0.5656705533542029,
+    "temperature_C": 0.007301679747153209,
+    "tilt_deg": 0.0017733602851421864,
+    "azimuth_deg": 0.0008558320963633055,
+    "num_panels": 0.19720026169081598,
+    "hour": 0.0017046924481923778,
+    "day_of_year": 0.000916109328556473,
+    "month": 0.0,
+    "is_weekend": 9.271478642531687e-05,
+    "solar_elevation": 0.0007441317183098436,
+    "daylight_hours": 0.00017753762746602984,
+    "system_capacity": 0.21758265215979597,
+    "tilt_efficiency": 0.0043529603353517415,
+    "Solar_Radiation": 0.0008673450713550907,
+    "Temperature": 0.000760169350869378
+  }
+}

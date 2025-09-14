@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Power Prediction Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+           
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #1a2a6c;
+        }
+        
+        .tagline {
+            font-size: 1.1rem;
+            color: #666;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        nav a {
+            background: #1a2a6c;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        nav a:hover, nav a.active {
+            background: #fdbb2d;
+            color: #1a2a6c;
+            transform: translateY(-2px);
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section h2 {
+            font-size: 1.5rem;
+            color: #1a2a6c;
+            margin-bottom: 10px;
+        }
+        
+        .section p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group h3 {
+            font-size: 1rem;
+            color: #444;
+            margin-bottom: 8px;
+        }
+        
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border 0.3s ease;
+        }
+        
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #1a2a6c;
+            outline: none;
+        }
+        
+        .info-text {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .divider {
+            height: 1px;
+            background: #ddd;
+            margin: 30px 0;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #1a2a6c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn:hover {
+            background: #fdbb2d;
+            color: #1a2a6c;
+            transform: translateY(-2px);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-weight: bold;
+        }
+        
+        .slider-container {
+            margin-top: 8px;
+        }
+        
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #1a2a6c;
+            cursor: pointer;
+        }
+        
+        .slider-value {
+            text-align: right;
+            font-weight: bold;
+            color: #1a2a6c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Solar Power Prediction Platform</h1>
+            <p class="tagline">AI-powered solar energy forecasting with advanced ML optimization recommendations</p>
+        </header>
+        
+        <nav>
+            <a href="./PREDICT.HTML" class="active"><i class="fas fa-bolt"></i> Predict</a>
+            
+            <a href="./RESULT.html"><i class="fas fa-chart-line"></i> Results</a>
+            <a href="./EXPORT.html"><i class="fas fa-file-export"></i> Export</a>
+        </nav>
+        
+        <div class="content">
+            <div class="left-panel">
+                <div class="section">
+                    <h2>Location Details</h2>
+                    <p>Enter your installation location</p>
+                    
+                    <div class="input-group">
+                        <h3>City</h3>
+                        <input type="text" id="city" placeholder="San Francisco" value="San Francisco">
+                    </div>
+                    
+                    
+                </div>
+            </div>
+            
+            <div class="right-panel">
+                <div class="section">
+                    <h2>Panel Configuration</h2>
+                    <p>Specify your solar panel setup</p>
+                    
+                    <div class="input-group">
+                        <h3>Number of Panels</h3>
+                        <input type="number" id="numPanels" placeholder="20" value="20" min="1" step="1">
+                        <div class="slider-container">
+                            <input type="range" min="1" max="100" value="20" class="slider" id="numPanelsSlider">
+                            <div class="slider-value" id="numPanelsValue">20</div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <h3>Panel Area (m²)</h3>
+                        <input type="number" id="panelArea" placeholder="1.6" value="1.6" min="0.1" step="0.1">
+                        <p class="info-text">Typical residential panel: 1.6-2.0 m²</p>
+                        <div class="slider-container">
+                            <input type="range" min="0.5" max="5" value="1.6" step="0.1" class="slider" id="panelAreaSlider">
+                            <div class="slider-value" id="panelAreaValue">1.6 m²</div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <h3>Panel Efficiency</h3>
+                        <input type="number" id="panelEfficiency" placeholder="0.2" value="0.2" min="0.1" max="0.4" step="0.01">
+                        <p class="info-text">Typically between 0.15 and 0.22 for standard panels</p>
+                        <div class="slider-container">
+                            <input type="range" min="0.1" max="0.4" value="0.2" step="0.01" class="slider" id="panelEfficiencySlider">
+                            <div class="slider-value" id="panelEfficiencyValue">20%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <h3>Inverter Efficiency</h3>
+                        <input type="number" id="inverterEfficiency" placeholder="0.96" value="0.96" min="0.8" max="0.99" step="0.01">
+                        <p class="info-text">Typically between 0.94 and 0.98 for modern inverters</p>
+                        <div class="slider-container">
+                            <input type="range" min="0.8" max="0.99" value="0.96" step="0.01" class="slider" id="inverterEfficiencySlider">
+                            <div class="slider-value" id="inverterEfficiencyValue">96%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <h3>Tilt Angle (°)</h3>
+                        <input type="number" id="tilt" placeholder="30" value="30" min="0" max="90" step="1">
+                        <p class="info-text">Angle between 0° (flat) and 90° (vertical)</p>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="90" value="30" class="slider" id="tiltSlider">
+                            <div class="slider-value" id="tiltValue">30°</div>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <h3>Azimuth Angle (°)</h3>
+                        <input type="number" id="azimuth" placeholder="180" value="180" min="0" max="360" step="1">
+                        <p class="info-text">0° = North, 90° = East, 180° = South, 270° = West</p>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="360" value="180" class="slider" id="azimuthSlider">
+                            <div class="slider-value" id="azimuthValue">180°</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <button class="btn" id="predict-btn">
+            <i class="fas fa-brain"></i> Generate AI Prediction
+        </button>
+        
+        <footer>
+            <p>QUANTUM STACK</p>
+        </footer>
+    </div>
+
+    <!-- <script>
+        // Sync sliders with number inputs
+        const syncInputWithSlider = (inputId, sliderId, valueId, formatFn) => {
+            const input = document.getElementById(inputId);
+            const slider = document.getElementById(sliderId);
+            const valueDisplay = document.getElementById(valueId);
+            
+            input.addEventListener('input', () => {
+                slider.value = input.value;
+                valueDisplay.textContent = formatFn ? formatFn(input.value) : input.value;
+            });
+            
+            slider.addEventListener('input', () => {
+                input.value = slider.value;
+                valueDisplay.textContent = formatFn ? formatFn(slider.value) : slider.value;
+            });
+            
+            // Initialize display
+            valueDisplay.textContent = formatFn ? formatFn(input.value) : input.value;
+        };
+        
+        // Set up all sliders
+        syncInputWithSlider('numPanels', 'numPanelsSlider', 'numPanelsValue');
+        syncInputWithSlider('panelArea', 'panelAreaSlider', 'panelAreaValue', val => `${val} m²`);
+        syncInputWithSlider('panelEfficiency', 'panelEfficiencySlider', 'panelEfficiencyValue', val => `${(val * 100).toFixed(0)}%`);
+        syncInputWithSlider('inverterEfficiency', 'inverterEfficiencySlider', 'inverterEfficiencyValue', val => `${(val * 100).toFixed(0)}%`);
+        syncInputWithSlider('tilt', 'tiltSlider', 'tiltValue', val => `${val}°`);
+        syncInputWithSlider('azimuth', 'azimuthSlider', 'azimuthValue', val => `${val}°`);
+        
+        // Add button click event
+        document.getElementById('predict-btn').addEventListener('click', () => {
+            alert('AI Prediction generated with current parameters!');
+            // In a real application, this would send the data to a backend for processing
+        });
+    </script> -->
+    <script>
+    // Sync sliders with number inputs
+    const syncInputWithSlider = (inputId, sliderId, valueId, formatFn) => {
+        const input = document.getElementById(inputId);
+        const slider = document.getElementById(sliderId);
+        const valueDisplay = document.getElementById(valueId);
+        
+        input.addEventListener('input', () => {
+            slider.value = input.value;
+            valueDisplay.textContent = formatFn ? formatFn(input.value) : input.value;
+        });
+        
+        slider.addEventListener('input', () => {
+            input.value = slider.value;
+            valueDisplay.textContent = formatFn ? formatFn(slider.value) : slider.value;
+        });
+        
+        // Initialize display
+        valueDisplay.textContent = formatFn ? formatFn(input.value) : input.value;
+    };
+    
+    // Set up all sliders
+    syncInputWithSlider('numPanels', 'numPanelsSlider', 'numPanelsValue');
+    syncInputWithSlider('panelArea', 'panelAreaSlider', 'panelAreaValue', val => `${val} m²`);
+    syncInputWithSlider('panelEfficiency', 'panelEfficiencySlider', 'panelEfficiencyValue', val => `${(val * 100).toFixed(0)}%`);
+    syncInputWithSlider('inverterEfficiency', 'inverterEfficiencySlider', 'inverterEfficiencyValue', val => `${(val * 100).toFixed(0)}%`);
+    syncInputWithSlider('tilt', 'tiltSlider', 'tiltValue', val => `${val}°`);
+    syncInputWithSlider('azimuth', 'azimuthSlider', 'azimuthValue', val => `${val}°`);
+    
+    // Add button click event
+    document.getElementById('predict-btn').addEventListener('click', async () => {
+        // Collect all form data
+        const formData = {
+            city: document.getElementById('city').value,
+            latitude: document.getElementById('latitude').value,
+            longitude: document.getElementById('longitude').value,
+            numPanels: document.getElementById('numPanels').value,
+            panelArea: document.getElementById('panelArea').value,
+            panelEfficiency: document.getElementById('panelEfficiency').value,
+            inverterEfficiency: document.getElementById('inverterEfficiency').value,
+            tilt: document.getElementById('tilt').value,
+            azimuth: document.getElementById('azimuth').value
+        };
+        
+        try {
+            // Show loading state
+            const btn = document.getElementById('predict-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+            
+            // Send data to server
+            const response = await fetch('http://localhost:3001/api/predict/16days', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                // Display results (you'll need to implement this)
+                alert(`Prediction successful! Total energy: ${result.summary.totalKWh} kWh over 16 days`);
+                console.log('Prediction results:', result);
+                
+                // In a real application, you would display these results on the page
+                // For now, we'll just show an alert
+            } else {
+                alert(`Error: ${result.error}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to generate prediction. Please check your connection and try again.');
+        } finally {
+            // Restore button state
+            const btn = document.getElementById('predict-btn');
+            btn.innerHTML = '<i class="fas fa-brain"></i> Generate AI Prediction';
+            btn.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>

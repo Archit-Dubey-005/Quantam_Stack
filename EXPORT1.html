@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Power Prediction Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #1a2a6c;
+        }
+        
+        .tagline {
+            font-size: 1.1rem;
+            color: #666;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        nav a {
+            background: #1a2a6c;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        nav a:hover, nav a.active {
+            background: #fdbb2d;
+            color: #1a2a6c;
+            transform: translateY(-2px);
+        }
+        
+        .content {
+            margin: 30px 0;
+        }
+        
+        .export-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .export-header h2 {
+            font-size: 2rem;
+            color: #1a2a6c;
+            margin-bottom: 10px;
+        }
+        
+        .export-header p {
+            color: #666;
+        }
+        
+        .results-placeholder {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .results-placeholder h3 {
+            font-size: 1.5rem;
+            color: #1a2a6c;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .results-placeholder p {
+            color: #666;
+        }
+        
+        .export-options {
+            display: grid;
+            grid-template-columns: 1fr ;
+            gap: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .export-options {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .export-card {
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .export-card h3 {
+            font-size: 1.3rem;
+            color: #1a2a6c;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .export-card p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .json-preview, .csv-preview {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            max-height: 200px;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #1a2a6c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            background: #fdbb2d;
+            color: #1a2a6c;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Solar Power Prediction Platform</h1>
+            <p class="tagline">AI-powered solar energy forecasting with advanced ML optimization recommendations</p>
+            
+            <nav>
+                <a href="./PREDICT.html"><i class="fas fa-chart-line"></i> Predict</a>
+                <a href="./RESULT.html" ><i class="fas fa-poll"></i> Results</a>
+                <a href="./EXPORT.html"class="active" ><i class="fas fa-file-export"></i> Export</a>
+            </nav>
+        </header>
+        
+        <div class="content">
+            <div class="export-header">
+                <h2>Export Results</h2>
+                <p>Download your solar power prediction and optimization data in various formats</p>
+            </div>
+            
+            <div class="results-placeholder">
+                <h3><i class="fas fa-info-circle"></i> Analysis Complete</h3>
+                <p>Your solar power analysis has been successfully processed. You can now export the results in your preferred format.</p>
+            </div>
+            
+            <div class="export-options">
+                <!-- <div class="export-card">
+                    <h3><i class="fas fa-file-code"></i> JSON Export</h3>
+                    <p>Export your data in JSON format for integration with other applications and APIs.</p>
+                    <div class="json-preview">
+{
+  "location": "San Francisco, CA",
+  "daily_output": 35.7,
+  "optimal_tilt": 37.8,
+  "efficiency_gain": 8.3,
+  "annual_estimate": 13031,
+  "recommendations": [
+    "Increase panel tilt angle from 30.0° to 37.8°",
+    "Adjust azimuth angle slightly from 180.0° to 175.0°",
+    "Consider cleaning panels bi-monthly"
+  ]
+}
+                    </div>
+                    <a href="#" class="btn"><i class="fas fa-download"></i> Download JSON</a>
+                </div> -->
+                
+                <div class="export-card">
+                    <h3><i class="fas fa-file-csv"></i> CSV Export</h3>
+                    <p>Export your data in CSV format for analysis in spreadsheet applications.</p>
+                    <div class="csv-preview">
+Date,Output (kWh),Irradiance (W/m²),Temperature (°C)
+2025-09-01,38.2,450,28.5
+2025-09-02,41.5,480,29.2
+2025-09-03,35.7,420,27.8
+2025-09-04,32.4,390,26.5
+2025-09-05,36.8,435,28.1
+2025-09-06,40.1,465,29.5
+2025-09-07,37.9,445,28.3
+                    </div>
+                    <a href="#" class="btn"><i class="fas fa-download"></i> Download CSV</a>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>QUANTUM STACK</p>
+        </footer>
+    </div>
+</body>
+</html>

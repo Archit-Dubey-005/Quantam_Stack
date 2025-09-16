@@ -58,11 +58,20 @@ async function geocodeLocation(location) {
 }
 
 async function fetchForecast(lat, lon) {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=shortwave_radiation,temperature_2m&forecast_days=16&timezone=auto`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=shortwave_radiation,temperature_2m,relative_humidity_2m,cloud_cover,wind_speed_10m,wind_direction_10m,precipitation&forecast_days=16&timezone=auto`;
   const res = await fetch(url);
   const data = await res.json();
   if (!data || !data.hourly || !Array.isArray(data.hourly.time)) throw new Error("Weather API failed");
-  return { time: data.hourly.time, ghi: data.hourly.shortwave_radiation, temp: data.hourly.temperature_2m };
+  return { 
+    time: data.hourly.time, 
+    ghi: data.hourly.shortwave_radiation, 
+    temp: data.hourly.temperature_2m,
+    humidity: data.hourly.relative_humidity_2m,
+    cloudCover: data.hourly.cloud_cover,
+    windSpeed: data.hourly.wind_speed_10m,
+    windDirection: data.hourly.wind_direction_10m,
+    precipitation: data.hourly.precipitation
+  };
 }
 
 function calculateHourlyEnergy({ ghi, tempC, numPanels, panelArea, panelEfficiency, inverterEfficiency, tiltDeg, tempCoeff, soilingFactor, systemDerate, inverterRatedPower, noct }) {
@@ -168,6 +177,11 @@ app.post("/api/predict/16days", async (req, res) => {
       timestamp: t,
       ghi_W_m2: forecast.ghi[i] || 0,
       temp_C: forecast.temp[i] || 0,
+      humidity_pct: forecast.humidity[i] || 0,
+      cloud_cover_pct: forecast.cloudCover[i] || 0,
+      wind_speed_ms: forecast.windSpeed[i] || 0,
+      wind_direction_deg: forecast.windDirection[i] || 0,
+      precipitation_mm: forecast.precipitation[i] || 0,
       ac_kWh: calculateHourlyEnergy({
         ghi: forecast.ghi[i],
         tempC: forecast.temp[i],
@@ -233,7 +247,19 @@ app.post("/api/predict/16days", async (req, res) => {
     }
 
     // Save CSV for download
-    const parser = new Parser({ fields: ["timestamp", "ghi_W_m2", "temp_C", "ac_kWh"] });
+    const parser = new Parser({ 
+      fields: [
+        "timestamp", 
+        "ghi_W_m2", 
+        "temp_C", 
+        "humidity_pct", 
+        "cloud_cover_pct", 
+        "wind_speed_ms", 
+        "wind_direction_deg", 
+        "precipitation_mm", 
+        "ac_kWh"
+      ] 
+    });
     const csv = parser.parse(hourlyResults);
     const fileName = `solar_prediction_${Date.now()}.csv`;
     const filePath = path.join(process.cwd(), "public", fileName);

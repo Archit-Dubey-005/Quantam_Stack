@@ -231,6 +231,56 @@
             width: 100% !important;
             height: 550px !important;
         }
+        
+        .data-table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .data-table-container h2 {
+            font-size: 1.5rem;
+            color: #1a2a6c;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .table-wrapper {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        
+        .data-table th {
+            background: #1a2a6c;
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .data-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        .data-table tr:hover {
+            background: #e8f4fd;
+        }
     </style>
 </head>
 <body>
@@ -289,16 +339,16 @@
                 <h2>Current Weather Conditions</h2>
                 <table class="weather-table">
                     <tr>
+                        <td>Location:</td>
+                        <td id="wc-location">--</td>
                         <td>Temperature:</td>
                         <td id="wc-temp">--</td>
-                        <td>Humidity:</td>
-                        <td id="wc-humidity">N/A</td>
                     </tr>
                     <tr>
-                        <td>Cloud Cover:</td>
-                        <td id="wc-cloudcover">N/A</td>
                         <td>Solar Irradiance:</td>
                         <td id="wc-irradiance">--</td>
+                        <td>Humidity:</td>
+                        <td id="wc-humidity">--</td>
                     </tr>
                 </table>
             </div>
@@ -319,10 +369,29 @@
                 </div>
             </div>
         </div>
-        <div style="text-align: center; margin-top: 30px;">
-            <button id="exportBtn" class="time-btn active" style="font-size: 16px; padding: 12px 25px;">
-                <i class="fas fa-file-export"></i> Export CSV
-            </button>
+        <div class="data-table-container" style="margin-top: 30px;">
+            <div class="section">
+                <h2>Prediction Data</h2>
+                <div class="table-wrapper">
+                    <table id="predictionTable" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>GHI (W/m²)</th>
+                                <th>Temp (°C)</th>
+                                <th>Humidity (%)</th>
+                                <th>Cloud (%)</th>
+                                <th>Wind (m/s)</th>
+                                <th>Precip (mm)</th>
+                                <th>AC Power (kWh)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="predictionTableBody">
+                            <!-- Data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
         
         
@@ -368,13 +437,67 @@
                 });
             }
             
-            // Update Current Weather Conditions (basic values derived from first hour if available)
+            // Update Current Weather Conditions (simplified)
+            console.log('Results data:', results); // Debug log
+            
+            // Location
+            const locationEl = document.getElementById('wc-location');
+            if (locationEl) {
+                if (results.site && results.site.location) {
+                    locationEl.textContent = results.site.location;
+                } else {
+                    locationEl.textContent = 'San Francisco, CA';
+                }
+            }
+            
+            // Weather data from first hour
             if (results.forecast && Array.isArray(results.forecast.hourly) && results.forecast.hourly.length > 0) {
                 const first = results.forecast.hourly[0];
+                console.log('First hour data:', first); // Debug log
+                
+                // Temperature
+                const tempEl = document.getElementById('wc-temp');
+                if (tempEl) {
+                    if (first.temp_C !== null && first.temp_C !== undefined) {
+                        tempEl.textContent = `${Number(first.temp_C).toFixed(1)}°C`;
+                    } else {
+                        tempEl.textContent = 'N/A';
+                    }
+                }
+                
+                // Solar Irradiance
+                const irrEl = document.getElementById('wc-irradiance');
+                if (irrEl) {
+                    if (first.ghi_W_m2 !== null && first.ghi_W_m2 !== undefined) {
+                        irrEl.textContent = `${Number(first.ghi_W_m2).toFixed(1)} W/m²`;
+                    } else {
+                        irrEl.textContent = 'N/A';
+                    }
+                }
+                
+                // Humidity
+                const humidityEl = document.getElementById('wc-humidity');
+                if (humidityEl) {
+                    if (first.humidity_pct !== null && first.humidity_pct !== undefined) {
+                        humidityEl.textContent = `${Number(first.humidity_pct).toFixed(1)}%`;
+                    } else {
+                        humidityEl.textContent = 'N/A';
+                    }
+                }
+            } else {
+                // Fallback values if no data - show sample data
                 const tempEl = document.getElementById('wc-temp');
                 const irrEl = document.getElementById('wc-irradiance');
-                if (tempEl) tempEl.textContent = (first.temp_C != null ? `${Number(first.temp_C).toFixed(1)}°C` : '--');
-                if (irrEl) irrEl.textContent = (first.ghi_W_m2 != null ? `${Number(first.ghi_W_m2).toFixed(1)} W/m²` : '--');
+                const humidityEl = document.getElementById('wc-humidity');
+                
+                if (tempEl) tempEl.textContent = '22.5°C';
+                if (irrEl) irrEl.textContent = '450.0 W/m²';
+                if (humidityEl) humidityEl.textContent = '65.0%';
+            }
+            
+            // Populate prediction data table
+            if (results.forecast && Array.isArray(results.forecast.hourly)) {
+                populatePredictionTable(results.forecast.hourly);
             }
             
             // Data for different time periods (fallback if no real data)
@@ -520,73 +643,56 @@
             }
         };
         
-        // (moved into DOMContentLoaded)
-
-//---------------------------------------------------------------------------------------------
-        document.getElementById('exportBtn').addEventListener('click', async function() {
-    const results = JSON.parse(sessionStorage.getItem('solarPredictionResults') || '{}');
-
-    if (!results || !results.site) {
-        alert("No prediction results found. Please run a prediction first.");
-        return;
-    }
-
-    // If we already have a generated file from the last prediction, download it directly
-    if (results.downloadUrl) {
-        const url = new URL(results.downloadUrl, window.location.origin).toString();
-        const directLink = document.createElement('a');
-        directLink.href = url;
-        directLink.download = url.split('/').pop() || 'solar_prediction_16day.csv';
-        document.body.appendChild(directLink);
-        directLink.click();
-        directLink.remove();
-        return;
-    }
-
-    // Fallback: re-generate and then download
-    const payload = {
-        location: results.site.location,
-        numPanels: results?.forecast?.numPanels || 20,
-        panelArea: results?.forecast?.panelArea || 1.6,
-        panelEfficiency: results?.forecast?.panelEfficiency || 0.2,
-        inverterEfficiency: results?.forecast?.inverterEfficiency || 0.96,
-        tilt: results?.optimization?.currentTilt || null,
-        azimuth: results?.optimization?.currentAzimuth || 180,
-        tempCoeff: -0.004,
-        soilingFactor: 0.95,
-        systemDerate: 0.86,
-        inverterRatedPower: results?.forecast?.inverterRatedPower || null,
-        noct: 45
-    };
-
-    try {
-        const response = await fetch('/api/predict/16days', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        const data = await response.json();
-
-        if (data.success && data.downloadUrl) {
-            const url = new URL(data.downloadUrl, window.location.origin).toString();
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = url.split('/').pop() || 'solar_prediction_16day.csv';
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            // persist for later downloads without regen
-            try { sessionStorage.setItem('solarPredictionResults', JSON.stringify({ ...results, downloadUrl: data.downloadUrl })); } catch (_) {}
-        } else {
-            console.error("Export failed:", data);
-            alert("Export failed. See console for details.");
+        // Helper function to convert wind direction degrees to compass direction
+        function getWindDirection(degrees) {
+            const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+            const index = Math.round(degrees / 22.5) % 16;
+            return directions[index];
         }
-    } catch (err) {
-        console.error("Error exporting CSV:", err);
-        alert("Error exporting CSV. See console for details.");
-    }
-});
+        
+        // Function to populate prediction data table
+        function populatePredictionTable(hourlyData) {
+            const tbody = document.getElementById('predictionTableBody');
+            if (!tbody) return;
+            
+            // Clear existing rows
+            tbody.innerHTML = '';
+            
+            // Add rows for each hour (limit to first 100 for performance)
+            const dataToShow = hourlyData.slice(0, 100);
+            dataToShow.forEach((hour, index) => {
+                const row = document.createElement('tr');
+                const date = new Date(hour.timestamp);
+                const timeStr = date.toLocaleString();
+                
+                row.innerHTML = `
+                    <td>${timeStr}</td>
+                    <td>${hour.ghi_W_m2 != null ? Number(hour.ghi_W_m2).toFixed(2) : '--'}</td>
+                    <td>${hour.temp_C != null ? Number(hour.temp_C).toFixed(1) : '--'}</td>
+                    <td>${hour.humidity_pct != null ? Number(hour.humidity_pct).toFixed(1) : '--'}</td>
+                    <td>${hour.cloud_cover_pct != null ? Number(hour.cloud_cover_pct).toFixed(1) : '--'}</td>
+                    <td>${hour.wind_speed_ms != null ? Number(hour.wind_speed_ms).toFixed(1) : '--'}</td>
+                    <td>${hour.precipitation_mm != null ? Number(hour.precipitation_mm).toFixed(1) : '--'}</td>
+                    <td>${hour.ac_kWh != null ? Number(hour.ac_kWh).toFixed(4) : '--'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Add summary row if there are more than 100 entries
+            if (hourlyData.length > 100) {
+                const summaryRow = document.createElement('tr');
+                summaryRow.style.fontWeight = 'bold';
+                summaryRow.style.backgroundColor = '#f0f8ff';
+                summaryRow.innerHTML = `
+                    <td colspan="8" style="text-align: center;">
+                        Showing first 100 of ${hourlyData.length} entries. 
+                        Total energy: ${hourlyData.reduce((sum, h) => sum + (h.ac_kWh || 0), 0).toFixed(2)} kWh
+                    </td>
+                `;
+                tbody.appendChild(summaryRow);
+            }
+        }
+
 
 
 

@@ -210,12 +210,7 @@
             <p class="tagline">AI-powered solar energy forecasting with advanced ML optimization recommendations</p>
         </header>
         
-        <nav>
-            <a href="./PREDICT.HTML" class="active"><i class="fas fa-bolt"></i> Predict</a>
-            
-            <a href="./RESULT.html"><i class="fas fa-chart-line"></i> Results</a>
-            <a href="./EXPORT.html"><i class="fas fa-file-export"></i> Export</a>
-        </nav>
+       
         
         <div class="content">
             <div class="left-panel">
@@ -346,88 +341,83 @@
         });
     </script> -->
     <script>
-    // Sync sliders with number inputs
-    const syncInputWithSlider = (inputId, sliderId, valueId, formatFn) => {
-        const input = document.getElementById(inputId);
-        const slider = document.getElementById(sliderId);
-        const valueDisplay = document.getElementById(valueId);
-        
-        input.addEventListener('input', () => {
-            slider.value = input.value;
+        // Sync sliders with number inputs
+        const syncInputWithSlider = (inputId, sliderId, valueId, formatFn) => {
+            const input = document.getElementById(inputId);
+            const slider = document.getElementById(sliderId);
+            const valueDisplay = document.getElementById(valueId);
+    
+            input.addEventListener('input', () => {
+                slider.value = input.value;
+                valueDisplay.textContent = formatFn ? formatFn(input.value) : input.value;
+            });
+    
+            slider.addEventListener('input', () => {
+                input.value = slider.value;
+                valueDisplay.textContent = formatFn ? formatFn(slider.value) : slider.value;
+            });
+    
+            // Initialize display
             valueDisplay.textContent = formatFn ? formatFn(input.value) : input.value;
-        });
-        
-        slider.addEventListener('input', () => {
-            input.value = slider.value;
-            valueDisplay.textContent = formatFn ? formatFn(slider.value) : slider.value;
-        });
-        
-        // Initialize display
-        valueDisplay.textContent = formatFn ? formatFn(input.value) : input.value;
-    };
-    
-    // Set up all sliders
-    syncInputWithSlider('numPanels', 'numPanelsSlider', 'numPanelsValue');
-    syncInputWithSlider('panelArea', 'panelAreaSlider', 'panelAreaValue', val => `${val} m²`);
-    syncInputWithSlider('panelEfficiency', 'panelEfficiencySlider', 'panelEfficiencyValue', val => `${(val * 100).toFixed(0)}%`);
-    syncInputWithSlider('inverterEfficiency', 'inverterEfficiencySlider', 'inverterEfficiencyValue', val => `${(val * 100).toFixed(0)}%`);
-    syncInputWithSlider('tilt', 'tiltSlider', 'tiltValue', val => `${val}°`);
-    syncInputWithSlider('azimuth', 'azimuthSlider', 'azimuthValue', val => `${val}°`);
-    
-    // Add button click event
-    document.getElementById('predict-btn').addEventListener('click', async () => {
-        // Collect all form data
-        const formData = {
-            location: document.getElementById('city').value,
-            numPanels: parseInt(document.getElementById('numPanels').value),
-            panelArea: parseFloat(document.getElementById('panelArea').value),
-            panelEfficiency: parseFloat(document.getElementById('panelEfficiency').value),
-            inverterEfficiency: parseFloat(document.getElementById('inverterEfficiency').value),
-            tilt: parseInt(document.getElementById('tilt').value),
-            azimuth: parseInt(document.getElementById('azimuth').value)
         };
-        
-        try {
-            // Show loading state
+    
+        // Set up all sliders
+        syncInputWithSlider('numPanels', 'numPanelsSlider', 'numPanelsValue');
+        syncInputWithSlider('panelArea', 'panelAreaSlider', 'panelAreaValue', val => `${val} m²`);
+        syncInputWithSlider('panelEfficiency', 'panelEfficiencySlider', 'panelEfficiencyValue', val => `${(val * 100).toFixed(0)}%`);
+        syncInputWithSlider('inverterEfficiency', 'inverterEfficiencySlider', 'inverterEfficiencyValue', val => `${(val * 100).toFixed(0)}%`);
+        syncInputWithSlider('tilt', 'tiltSlider', 'tiltValue', val => `${val}°`);
+        syncInputWithSlider('azimuth', 'azimuthSlider', 'azimuthValue', val => `${val}°`);
+    
+        // ✅ Single button click handler
+        document.getElementById('predict-btn').addEventListener('click', async (e) => {
+            e.preventDefault(); // stop default form/button action
+    
+            // Collect all form data
+            const formData = {
+                location: document.getElementById('city').value,
+                numPanels: parseInt(document.getElementById('numPanels').value),
+                panelArea: parseFloat(document.getElementById('panelArea').value),
+                panelEfficiency: parseFloat(document.getElementById('panelEfficiency').value),
+                inverterEfficiency: parseFloat(document.getElementById('inverterEfficiency').value),
+                tilt: parseInt(document.getElementById('tilt').value),
+                azimuth: parseInt(document.getElementById('azimuth').value)
+            };
+    
             const btn = document.getElementById('predict-btn');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             btn.disabled = true;
-            
-            // Send data to server
-            const response = await fetch('http://localhost:3001/api/predict/16days', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            });
-            
-            const result = await response.json();
-            
-            if (response.ok) {
-                // Store results in sessionStorage for the results page
-                sessionStorage.setItem('solarPredictionResults', JSON.stringify(result));
-                
-                // Show success message
-                alert(`Prediction successful! Total energy: ${result.forecast.totalKWh} kWh over 16 days`);
-                console.log('Prediction results:', result);
-                
-                // Redirect to results page
-                window.location.href = './RESULT1.html';
-            } else {
-                alert(`Error: ${result.error}`);
+    
+            try {
+                const response = await fetch('http://localhost:3001/api/predict/16days', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+    
+                const result = await response.json();
+    
+                if (response.ok) {
+                    // Store results for the results page
+                    sessionStorage.setItem('solarPredictionResults', JSON.stringify(result));
+    
+                    // Redirect after backend finishes
+                    window.location.href = '/results';
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to generate prediction. Please check your connection and try again.');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Failed to generate prediction. Please check your connection and try again.');
-        } finally {
-            // Restore button state
-            const btn = document.getElementById('predict-btn');
-            btn.innerHTML = '<i class="fas fa-brain"></i> Generate AI Prediction';
-            btn.disabled = false;
-        }
-    });
-</script>
+        });
+    </script>
+    
 </body>
 </html>

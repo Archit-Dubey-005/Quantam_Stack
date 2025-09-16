@@ -240,11 +240,7 @@
             <p class="subtitle">AI-powered solar energy forecasting with advanced ML optimization recommendations</p>
             
              
-            <nav>
-                <a href="./PREDICT.html"><i class="fas fa-chart-line"></i> Predict</a>
-                <a href="./RESULT.html"class="active" ><i class="fas fa-poll"></i> Results</a>
-                <a href="./EXPORT.html" ><i class="fas fa-file-export"></i> Export</a>
-            </nav>
+            
         </header>
         
         <div class="dashboard">
@@ -294,15 +290,15 @@
                 <table class="weather-table">
                     <tr>
                         <td>Temperature:</td>
-                        <td>28.8°C</td>
+                        <td id="wc-temp">--</td>
                         <td>Humidity:</td>
-                        <td>67.8%</td>
+                        <td id="wc-humidity">N/A</td>
                     </tr>
                     <tr>
                         <td>Cloud Cover:</td>
-                        <td>22.4%</td>
+                        <td id="wc-cloudcover">N/A</td>
                         <td>Solar Irradiance:</td>
-                        <td>442.3 W/m²</td>
+                        <td id="wc-irradiance">--</td>
                     </tr>
                 </table>
             </div>
@@ -323,6 +319,12 @@
                 </div>
             </div>
         </div>
+        <div style="text-align: center; margin-top: 30px;">
+            <button id="exportBtn" class="time-btn active" style="font-size: 16px; padding: 12px 25px;">
+                <i class="fas fa-file-export"></i> Export CSV
+            </button>
+        </div>
+        
         
         <footer>
             <p>Solar Power Prediction Platform © 2025 | AI-powered insights for optimal solar energy production</p>
@@ -366,9 +368,13 @@
                 });
             }
             
-            // Update chart with real hourly data
-            if (results.forecast && results.forecast.hourly) {
-                updateChartWithRealData(results.forecast.hourly);
+            // Update Current Weather Conditions (basic values derived from first hour if available)
+            if (results.forecast && Array.isArray(results.forecast.hourly) && results.forecast.hourly.length > 0) {
+                const first = results.forecast.hourly[0];
+                const tempEl = document.getElementById('wc-temp');
+                const irrEl = document.getElementById('wc-irradiance');
+                if (tempEl) tempEl.textContent = (first.temp_C != null ? `${Number(first.temp_C).toFixed(1)}°C` : '--');
+                if (irrEl) irrEl.textContent = (first.ghi_W_m2 != null ? `${Number(first.ghi_W_m2).toFixed(1)} W/m²` : '--');
             }
             
             // Data for different time periods (fallback if no real data)
@@ -447,7 +453,27 @@
 
             let h2 = document.querySelector('.chart-title');
 
-        
+            // Function to update chart with real data (first 24 hours)
+            function updateChartWithRealData(hourlyData) {
+                const labels = [];
+                const values = [];
+                const firstDay = hourlyData.slice(0, 24);
+                firstDay.forEach((hour) => {
+                    const date = new Date(hour.timestamp);
+                    const hourStr = `${date.getHours().toString().padStart(2, '0')}:00`;
+                    labels.push(hourStr);
+                    values.push(hour.ac_kWh);
+                });
+                chart.data.labels = labels;
+                chart.data.datasets[0].data = values;
+                chart.update();
+            }
+
+            // Update chart with real hourly data (after chart init)
+            if (results.forecast && results.forecast.hourly) {
+                updateChartWithRealData(results.forecast.hourly);
+            }
+            
             
             // Handle time period selection
             const timeButtons = document.querySelectorAll('.time-btn');
@@ -494,25 +520,79 @@
             }
         };
         
-        // Function to update chart with real data
-        function updateChartWithRealData(hourlyData) {
-            // Process hourly data to create chart data
-            const labels = [];
-            const values = [];
-            
-            // Take first 24 hours for hourly view
-            const firstDay = hourlyData.slice(0, 24);
-            firstDay.forEach((hour, index) => {
-                const date = new Date(hour.timestamp);
-                labels.push(date.getHours() + ':00');
-                values.push(hour.ac_kWh);
-            });
-            
-            // Update chart data
-            chart.data.labels = labels;
-            chart.data.datasets[0].data = values;
-            chart.update();
+        // (moved into DOMContentLoaded)
+
+//---------------------------------------------------------------------------------------------
+        document.getElementById('exportBtn').addEventListener('click', async function() {
+    const results = JSON.parse(sessionStorage.getItem('solarPredictionResults') || '{}');
+
+    if (!results || !results.site) {
+        alert("No prediction results found. Please run a prediction first.");
+        return;
+    }
+
+    // If we already have a generated file from the last prediction, download it directly
+    if (results.downloadUrl) {
+        const url = new URL(results.downloadUrl, window.location.origin).toString();
+        const directLink = document.createElement('a');
+        directLink.href = url;
+        directLink.download = url.split('/').pop() || 'solar_prediction_16day.csv';
+        document.body.appendChild(directLink);
+        directLink.click();
+        directLink.remove();
+        return;
+    }
+
+    // Fallback: re-generate and then download
+    const payload = {
+        location: results.site.location,
+        numPanels: results?.forecast?.numPanels || 20,
+        panelArea: results?.forecast?.panelArea || 1.6,
+        panelEfficiency: results?.forecast?.panelEfficiency || 0.2,
+        inverterEfficiency: results?.forecast?.inverterEfficiency || 0.96,
+        tilt: results?.optimization?.currentTilt || null,
+        azimuth: results?.optimization?.currentAzimuth || 180,
+        tempCoeff: -0.004,
+        soilingFactor: 0.95,
+        systemDerate: 0.86,
+        inverterRatedPower: results?.forecast?.inverterRatedPower || null,
+        noct: 45
+    };
+
+    try {
+        const response = await fetch('/api/predict/16days', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.downloadUrl) {
+            const url = new URL(data.downloadUrl, window.location.origin).toString();
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = url.split('/').pop() || 'solar_prediction_16day.csv';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            // persist for later downloads without regen
+            try { sessionStorage.setItem('solarPredictionResults', JSON.stringify({ ...results, downloadUrl: data.downloadUrl })); } catch (_) {}
+        } else {
+            console.error("Export failed:", data);
+            alert("Export failed. See console for details.");
         }
+    } catch (err) {
+        console.error("Error exporting CSV:", err);
+        alert("Error exporting CSV. See console for details.");
+    }
+});
+
+
+
+
+
+
     </script> 
        
 </body>

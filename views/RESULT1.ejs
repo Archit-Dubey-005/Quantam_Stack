@@ -344,29 +344,23 @@
                         <td>Temperature:</td>
                         <td id="wc-temp">--</td>
                     </tr>
-                    <tr>
-                        <td>Solar Irradiance:</td>
-                        <td id="wc-irradiance">--</td>
-                        <td>Humidity:</td>
-                        <td id="wc-humidity">--</td>
-                    </tr>
                 </table>
             </div>
             
             <div class="recommendations-card">
                 <h2>AI Recommendations</h2>
                 <div class="recommendation">
-                    <input type="checkbox" id="rec1">
+                    <!-- <input type="checkbox" id="rec1"> -->
                     <label for="rec1">Increase panel tilt angle from 30.0° to 37.8° to optimize for San Francisco's latitude</label>
                 </div>
-                <div class="recommendation">
-                    <input type="checkbox" id="rec2" checked>
-                    <label for="rec2">Adjust azimuth angle slightly from 180.0° to 175.0° to account for local solar path</label>
+                <!-- <div class="recommendation"> -->
+                    <!-- <input type="checkbox" id="rec2" checked> -->
+                    <!-- <label for="rec2">Adjust azimuth angle slightly from 180.0° to 175.0° to account for local solar path</label>
                 </div>
                 <div class="recommendation">
                     <input type="checkbox" id="rec3">
                     <label for="rec3">Consider cleaning panels bi-monthly due to San Francisco's coastal fog deposits</label>
-                </div>
+                </div> -->
             </div>
         </div>
         <div class="data-table-container" style="margin-top: 30px;">
@@ -378,11 +372,7 @@
                             <tr>
                                 <th>Timestamp</th>
                                 <th>GHI (W/m²)</th>
-                                <th>Temp (°C)</th>
-                                <th>Humidity (%)</th>
-                                <th>Cloud (%)</th>
-                                <th>Wind (m/s)</th>
-                                <th>Precip (mm)</th>
+                                <th>Temperature (°C)</th>
                                 <th>AC Power (kWh)</th>
                             </tr>
                         </thead>
@@ -437,9 +427,7 @@
                 });
             }
             
-            // Update Current Weather Conditions (simplified)
-            console.log('Results data:', results); // Debug log
-            
+            // Update Current Weather Conditions (location and temperature only)
             // Location
             const locationEl = document.getElementById('wc-location');
             if (locationEl) {
@@ -450,12 +438,10 @@
                 }
             }
             
-            // Weather data from first hour
+            // Temperature from first hour
             if (results.forecast && Array.isArray(results.forecast.hourly) && results.forecast.hourly.length > 0) {
                 const first = results.forecast.hourly[0];
-                console.log('First hour data:', first); // Debug log
                 
-                // Temperature
                 const tempEl = document.getElementById('wc-temp');
                 if (tempEl) {
                     if (first.temp_C !== null && first.temp_C !== undefined) {
@@ -464,35 +450,10 @@
                         tempEl.textContent = 'N/A';
                     }
                 }
-                
-                // Solar Irradiance
-                const irrEl = document.getElementById('wc-irradiance');
-                if (irrEl) {
-                    if (first.ghi_W_m2 !== null && first.ghi_W_m2 !== undefined) {
-                        irrEl.textContent = `${Number(first.ghi_W_m2).toFixed(1)} W/m²`;
-                    } else {
-                        irrEl.textContent = 'N/A';
-                    }
-                }
-                
-                // Humidity
-                const humidityEl = document.getElementById('wc-humidity');
-                if (humidityEl) {
-                    if (first.humidity_pct !== null && first.humidity_pct !== undefined) {
-                        humidityEl.textContent = `${Number(first.humidity_pct).toFixed(1)}%`;
-                    } else {
-                        humidityEl.textContent = 'N/A';
-                    }
-                }
             } else {
-                // Fallback values if no data - show sample data
+                // Fallback temperature
                 const tempEl = document.getElementById('wc-temp');
-                const irrEl = document.getElementById('wc-irradiance');
-                const humidityEl = document.getElementById('wc-humidity');
-                
                 if (tempEl) tempEl.textContent = '22.5°C';
-                if (irrEl) irrEl.textContent = '450.0 W/m²';
-                if (humidityEl) humidityEl.textContent = '65.0%';
             }
             
             // Populate prediction data table
@@ -669,10 +630,6 @@
                     <td>${timeStr}</td>
                     <td>${hour.ghi_W_m2 != null ? Number(hour.ghi_W_m2).toFixed(2) : '--'}</td>
                     <td>${hour.temp_C != null ? Number(hour.temp_C).toFixed(1) : '--'}</td>
-                    <td>${hour.humidity_pct != null ? Number(hour.humidity_pct).toFixed(1) : '--'}</td>
-                    <td>${hour.cloud_cover_pct != null ? Number(hour.cloud_cover_pct).toFixed(1) : '--'}</td>
-                    <td>${hour.wind_speed_ms != null ? Number(hour.wind_speed_ms).toFixed(1) : '--'}</td>
-                    <td>${hour.precipitation_mm != null ? Number(hour.precipitation_mm).toFixed(1) : '--'}</td>
                     <td>${hour.ac_kWh != null ? Number(hour.ac_kWh).toFixed(4) : '--'}</td>
                 `;
                 tbody.appendChild(row);
@@ -684,7 +641,7 @@
                 summaryRow.style.fontWeight = 'bold';
                 summaryRow.style.backgroundColor = '#f0f8ff';
                 summaryRow.innerHTML = `
-                    <td colspan="8" style="text-align: center;">
+                    <td colspan="4" style="text-align: center;">
                         Showing first 100 of ${hourlyData.length} entries. 
                         Total energy: ${hourlyData.reduce((sum, h) => sum + (h.ac_kWh || 0), 0).toFixed(2)} kWh
                     </td>

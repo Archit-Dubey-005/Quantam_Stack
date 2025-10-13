@@ -26,6 +26,13 @@ app.set('views', path.join(__dirname, 'views'));
 
 const PORT = process.env.PORT||3000;
 const PVWATTS_API_KEY = process.env.PVWATTS_API_KEY;
+// Writable output directory (Render's filesystem is read-only except /tmp)
+const OUTPUT_DIR = process.env.OUTPUT_DIR || path.join("/tmp", "quantum_public");
+// Ensure output directory exists and is served statically at /downloads
+if (!fs.existsSync(OUTPUT_DIR)) {
+  try { fs.mkdirSync(OUTPUT_DIR, { recursive: true }); } catch { /* noop */ }
+}
+app.use('/downloads', express.static(OUTPUT_DIR));
 
 // ----------------- helpers -----------------
 function deg2rad(d) {
@@ -262,11 +269,11 @@ app.post("/api/predict/16days", async (req, res) => {
     });
     const csv = parser.parse(hourlyResults);
     const fileName = `solar_prediction_${Date.now()}.csv`;
-    const filePath = path.join(process.cwd(), "public", fileName);
+    const filePath = path.join(OUTPUT_DIR, fileName);
     
-    // Ensure public directory exists
-    if (!fs.existsSync(path.join(process.cwd(), "public"))) {
-      fs.mkdirSync(path.join(process.cwd(), "public"));
+    // Ensure writable output directory exists
+    if (!fs.existsSync(OUTPUT_DIR)) {
+      fs.mkdirSync(OUTPUT_DIR, { recursive: true });
     }
     
     fs.writeFileSync(filePath, csv);
@@ -295,7 +302,7 @@ app.post("/api/predict/16days", async (req, res) => {
       },
       recommendations,
       pvwatts: pvwattsComparison,
-      downloadUrl: `/${fileName}`,
+      downloadUrl: `/downloads/${fileName}`,
       timestamp: new Date().toISOString()
     };
 
@@ -488,21 +495,21 @@ app.post("/api/calculate-capacity", (req, res) => {
 // List available CSV files for download
 app.get("/api/files", (req, res) => {
   try {
-    const publicDir = path.join(process.cwd(), "public");
-    if (!fs.existsSync(publicDir)) {
+    const dir = OUTPUT_DIR;
+    if (!fs.existsSync(dir)) {
       return res.json({ files: [] });
     }
 
-    const files = fs.readdirSync(publicDir)
+    const files = fs.readdirSync(dir)
       .filter(file => file.endsWith('.csv'))
       .map(file => {
-        const filePath = path.join(publicDir, file);
+        const filePath = path.join(dir, file);
         const stats = fs.statSync(filePath);
         return {
           name: file,
           size: stats.size,
           created: stats.birthtime,
-          downloadUrl: `/${file}`
+          downloadUrl: `/downloads/${file}`
         };
       })
       .sort((a, b) => new Date(b.created) - new Date(a.created));

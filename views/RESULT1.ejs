@@ -349,23 +349,15 @@
             
             <div class="recommendations-card">
                 <h2>AI Recommendations</h2>
-                <div class="recommendation">
-                    <!-- <input type="checkbox" id="rec1"> -->
-                    <label for="rec1">Increase panel tilt angle from 30.0° to 37.8° to optimize for San Francisco's latitude</label>
-                </div>
-                 <div class="recommendation"> -->
-                    <!-- <input type="checkbox" id="rec2" checked> -->
-                    <!-- <label for="rec2">Adjust azimuth angle slightly from 180.0° to 175.0° to account for local solar path</label>
-                </div>
-                <div class="recommendation">
-                    <input type="checkbox" id="rec3">
-                    <label for="rec3">Consider cleaning panels bi-monthly due to San Francisco's coastal fog deposits</label>
-                </div>
+                <!-- Recommendations populated dynamically below -->
             </div>
         </div>
         <div class="data-table-container" style="margin-top: 30px;">
             <div class="section">
                 <h2>Prediction Data</h2>
+                <div style="margin-bottom: 10px;">
+                    <a id="csvDownloadLink" href="#" target="_blank" style="text-decoration: none; background: #1a2a6c; color: #fff; padding: 8px 12px; border-radius: 6px;">Download CSV</a>
+                </div>
                 <div class="table-wrapper">
                     <table id="predictionTable" class="data-table">
                         <thead>
@@ -384,6 +376,19 @@
             </div>
         </div>
         
+        <div class="data-table-container" style="margin-top: 30px;">
+            <div class="section">
+                <h2>CSV File (Generated Output)</h2>
+                <div class="table-wrapper">
+                    <table id="csvPreviewTable" class="data-table">
+                        <thead id="csvPreviewHead"></thead>
+                        <tbody id="csvPreviewBody"></tbody>
+                    </table>
+                </div>
+                <div id="csvPreviewNote" class="info-text" style="margin-top: 8px; color: #666;"></div>
+            </div>
+        </div>
+        
         
         <footer>
             <p>Solar Power Prediction Platform © 2025 | AI-powered insights for optimal solar energy production</p>
@@ -392,7 +397,7 @@
 
      <script>
    
-         document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             // Load prediction results from sessionStorage
             const results = JSON.parse(sessionStorage.getItem('solarPredictionResults') || '{}');
             
@@ -459,6 +464,36 @@
             // Populate prediction data table
             if (results.forecast && Array.isArray(results.forecast.hourly)) {
                 populatePredictionTable(results.forecast.hourly);
+            }
+            
+            // Set CSV download link if available
+            const csvLink = document.getElementById('csvDownloadLink');
+            if (csvLink) {
+                if (results.downloadUrl) {
+                    csvLink.href = results.downloadUrl;
+                } else {
+                    csvLink.removeAttribute('href');
+                }
+            }
+            
+            // Fetch and render generated CSV if available
+            if (results.downloadUrl) {
+                try {
+                    const csvResp = await fetch(results.downloadUrl);
+                    if (csvResp.ok) {
+                        const csvText = await csvResp.text();
+                        renderCsvPreview(csvText);
+                    } else {
+                        const note = document.getElementById('csvPreviewNote');
+                        if (note) note.textContent = 'CSV not available to preview.';
+                    }
+                } catch (e) {
+                    const note = document.getElementById('csvPreviewNote');
+                    if (note) note.textContent = 'Unable to load CSV preview.';
+                }
+            } else {
+                const note = document.getElementById('csvPreviewNote');
+                if (note) note.textContent = 'CSV will be available after a successful prediction.';
             }
             
             // Data for different time periods (fallback if no real data)
@@ -648,6 +683,83 @@
                 `;
                 tbody.appendChild(summaryRow);
             }
+        }
+
+        // Basic CSV parser and renderer (assumes simple CSV without embedded commas in quotes)
+        function renderCsvPreview(csvText) {
+            const headEl = document.getElementById('csvPreviewHead');
+            const bodyEl = document.getElementById('csvPreviewBody');
+            if (!headEl || !bodyEl) return;
+            
+            // Split lines and filter out empties
+            const lines = csvText.split(/\r?\n/).filter(l => l.trim().length > 0);
+            if (lines.length === 0) return;
+            
+            const headers = parseCsvLine(lines[0]);
+            // Exclude precipitation column from preview
+            const excludeCols = new Set();
+            headers.forEach((h, idx) => {
+                if (h === 'precipitation_mm') excludeCols.add(idx);
+            });
+            const shownHeaders = headers.filter((_, idx) => !excludeCols.has(idx));
+            headEl.innerHTML = `<tr>${shownHeaders.map(h => `<th>${escapeHtml(h)}</th>`).join('')}</tr>`;
+            
+            const maxRows = 200; // limit preview for performance
+            const rows = lines.slice(1, 1 + maxRows).map(parseCsvLine);
+            bodyEl.innerHTML = rows.map(cols => {
+                const shownCols = cols.filter((_, idx) => !excludeCols.has(idx));
+                return `<tr>${shownCols.map(c => `<td>${escapeHtml(c)}</td>`).join('')}</tr>`;
+            }).join('');
+            
+            const note = document.getElementById('csvPreviewNote');
+            if (note) {
+                const total = lines.length - 1;
+                note.textContent = total > maxRows 
+                    ? `Showing first ${maxRows} of ${total} rows from generated CSV.`
+                    : `Showing ${total} rows from generated CSV.`;
+            }
+        }
+        
+        function parseCsvLine(line) {
+            // Minimal CSV parser supporting quoted values
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const ch = line[i];
+                if (inQuotes) {
+                    if (ch === '"') {
+                        if (i + 1 < line.length && line[i + 1] === '"') { // escaped quote
+                            current += '"';
+                            i++;
+                        } else {
+                            inQuotes = false;
+                        }
+                    } else {
+                        current += ch;
+                    }
+                } else {
+                    if (ch === ',') {
+                        result.push(current);
+                        current = '';
+                    } else if (ch === '"') {
+                        inQuotes = true;
+                    } else {
+                        current += ch;
+                    }
+                }
+            }
+            result.push(current);
+            return result;
+        }
+        
+        function escapeHtml(text) {
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
 

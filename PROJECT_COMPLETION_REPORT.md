@@ -150,7 +150,7 @@
 ## 🚀 **Deployment Status**
 
 ### **Development Environment**
-- ✅ **Backend Server**: Running on `http://localhost:3001`
+- ✅ **Backend Server**: Running on `https://quantam-stack.onrender.com`
 - ✅ **ML Pipeline**: Fully functional and tested
 - ✅ **Frontend**: All pages working with real data
 - ✅ **Data Flow**: Complete end-to-end integration
@@ -223,7 +223,7 @@
 
 ### **Ready for Use:**
 1. **Start Server**: `node server.js`
-2. **Open Browser**: Navigate to `http://localhost:3001`
+2. **Open Browser**: Navigate to `https://quantam-stack.onrender.com`
 3. **Enter Data**: Location and panel specifications
 4. **Get Predictions**: AI-powered solar forecasts
 5. **View Results**: Interactive charts and recommendations

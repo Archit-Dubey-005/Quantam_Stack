@@ -34,7 +34,7 @@ if not exist node_modules (
 
 REM Start the server
 echo Starting backend server...
-echo Server will be available at: http://localhost:3001
+echo Server will be available at: https://quantam-stack.onrender.com
 echo.
 echo Press Ctrl+C to stop the server
 echo.

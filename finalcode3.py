@@ -34,7 +34,7 @@ except FileNotFoundError:
 # ====== 2. Fetch baseline data from backend ======
 print("🌐 Fetching baseline data from backend...")
 
-backend_url = "http://localhost:3001/baseline-16day"
+backend_url = "https://quantam-stack.onrender.com/baseline-16day"
 
 try:
     response = requests.get(backend_url, timeout=30)
@@ -46,7 +46,7 @@ try:
         exit(1)
 except requests.exceptions.RequestException as e:
     print(f"❌ Failed to connect to backend: {e}")
-    print("💡 Make sure the backend server is running on http://localhost:3001")
+    print("💡 Make sure the backend server is accessible at https://quantam-stack.onrender.com")
     exit(1)
 
 # ====== 3. Convert daily to hourly data ======

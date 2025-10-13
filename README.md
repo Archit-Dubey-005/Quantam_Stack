@@ -140,7 +140,7 @@ A comprehensive web application that predicts solar power generation using physi
 
 ```javascript
 // Generate prediction
-const response = await fetch('http://localhost:3001/api/predict/16days', {
+const response = await fetch('https://quantam-stack.onrender.com/api/predict/16days', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({

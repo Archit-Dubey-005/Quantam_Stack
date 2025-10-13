@@ -51,7 +51,7 @@ npm install
 # Start the server
 node server.js
 ```
-✅ Server will run on `http://localhost:3001`
+✅ Server will run on `https://quantam-stack.onrender.com`
 
 ### **Step 2: Run ML Pipeline (Optional)**
 ```bash
@@ -61,7 +61,7 @@ python finalcode3.py
 ✅ This creates updated forecast files
 
 ### **Step 3: Use the Platform**
-1. Open browser to `http://localhost:3001`
+1. Open browser to `https://quantam-stack.onrender.com`
 2. Enter your location and panel specifications
 3. Click "Generate AI Prediction"
 4. View results with real data

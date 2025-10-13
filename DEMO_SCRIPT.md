@@ -7,11 +7,11 @@
 # Terminal 1: Start Backend Server
 cd C:\Users\98795\Git_clone\Quantam_Stack
 node server.js
-# ✅ Server running on http://localhost:3001
+# ✅ Server running on https://quantam-stack.onrender.com
 ```
 
 ### **Step 2: Open the Platform**
-1. **Open Browser** → Navigate to `http://localhost:3001`
+1. **Open Browser** → Navigate to `https://quantam-stack.onrender.com`
 2. **You'll see**: Modern solar prediction interface
 3. **Notice**: Professional design with interactive sliders
 

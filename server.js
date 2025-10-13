@@ -24,7 +24,7 @@ app.use(express.static(path.join(process.cwd(), "public")));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-const PORT = 3001;
+const PORT = process.env.PORT||3000;
 const PVWATTS_API_KEY = process.env.PVWATTS_API_KEY;
 
 // ----------------- helpers -----------------

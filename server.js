@@ -114,7 +114,7 @@ function computePVWattsParams({ lat, lon, systemCapacityKW = 5, tilt = 20, azimu
 }
 
 async function fetchPVWattsHourly(params) {
-  const url = `https://developer.nrel.gov/api/pvwatts/v6.json?${params.toString()}`;
+  const url = `https://developer.nrel.gov/api/pvwatts/v8.json?${params.toString()}`;
   const resp = await fetch(url, { headers: { 'User-Agent': 'solar-demo/1.0' } });
   if (!resp.ok) {
     const text = await resp.text();

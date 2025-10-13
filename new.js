@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(process.cwd(), "public")));
 
-const PORT = 3001;
+const PORT = process.env.PORT||3001;
 
 // ----------------- utilities -----------------
 function deg2rad(d) { return d * Math.PI / 180; }
@@ -24,7 +24,7 @@ async function geocodeLocation(location) {
 
 // ----------------- weather -----------------
 async function fetchForecast(lat, lon) {
-  const url = https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=shortwave_radiation_sum,temperature_2m_max,temperature_2m_min&forecast_days=16&timezone=auto;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=shortwave_radiation_sum,temperature_2m_max,temperature_2m_min&forecast_days=16&timezone=auto`;
   const res = await fetch(url);
   const data = await res.json();
   if (!data || !data.daily || !Array.isArray(data.daily.time)) {
@@ -97,7 +97,7 @@ async function fetchPVWattsHourly({ lat, lon, systemCapacityKW, tilt, azimuth, l
     timeframe: 'hourly'
   });
 
-  const url = ${base}?${params.toString()};
+  const url = `${base}?${params.toString()}`;
   const resp = await fetch(url);
   if (!resp.ok) {
     const txt = await resp.text();

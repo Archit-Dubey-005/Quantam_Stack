@@ -5,7 +5,7 @@ from io import StringIO
 # ====== 0. Load the trained model from merge2csv5.py ======
 # Make sure merge2csv5.py defines 'model' at the global level
 from merge2csv5 import model
-url = https://quantam-stack.onrender.com/baseline-16day"
+url = "https://quantam-stack.onrender.com/baseline-16day"
 
 # ====== 1. Fetch daily baseline CSV from backend route ======
 

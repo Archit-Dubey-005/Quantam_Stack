@@ -83,7 +83,7 @@ function computePVWattsParams({ numPanels, panelArea, panelEfficiency, systemDer
 async function fetchPVWattsHourly({ lat, lon, systemCapacityKW, tilt, azimuth, lossesPct }) {
   if (!PVWATTS_API_KEY) throw new Error('PVWATTS_API_KEY not set in environment');
 
-  const base = 'https://developer.nrel.gov/api/pvwatts/v6.json';
+  const base = 'https://developer.nrel.gov/api/pvwatts/v8.json';
   const params = new URLSearchParams({
     api_key: PVWATTS_API_KEY,
     lat: lat.toString(),

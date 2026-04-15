@@ -26,6 +26,7 @@ app.set('views', path.join(__dirname, 'views'));
 
 const PORT = process.env.PORT||3000;
 const PVWATTS_API_KEY = process.env.PVWATTS_API_KEY;
+<<<<<<< HEAD
 // Writable output directory (Render's filesystem is read-only except /tmp)
 const OUTPUT_DIR = process.env.OUTPUT_DIR || path.join("/tmp", "quantum_public");
 // Ensure output directory exists and is served statically at /downloads
@@ -33,6 +34,9 @@ if (!fs.existsSync(OUTPUT_DIR)) {
   try { fs.mkdirSync(OUTPUT_DIR, { recursive: true }); } catch { /* noop */ }
 }
 app.use('/downloads', express.static(OUTPUT_DIR));
+=======
+const GEOCODE_API_KEY = process.env.GEOCODE_API_KEY;
+>>>>>>> cfcd2d3 (Switched geocoding from Nominatim to OpenCage API and fixed API handling)
 
 // ----------------- helpers -----------------
 function deg2rad(d) {
@@ -56,12 +60,32 @@ app.get('/export', (req, res) => {
 });
 
 async function geocodeLocation(location) {
-  const q = encodeURIComponent(location);
-  const url = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`;
-  const res = await fetch(url, { headers: { 'User-Agent': 'solar-demo/1.0 (email@example.com)' } });
+  const API_KEY = process.env.GEOCODE_API_KEY;
+
+  if (!API_KEY) {
+    throw new Error("GEOCODE_API_KEY is missing");
+  }
+
+  const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(location)}&key=${API_KEY}`;
+
+  const res = await fetch(url);
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`OpenCage API error: ${text}`);
+  }
+
   const data = await res.json();
-  if (!data || data.length === 0) throw new Error("Location not found");
-  return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), display_name: data[0].display_name };
+
+  if (!data.results || data.results.length === 0) {
+    throw new Error("Location not found");
+  }
+
+  return {
+    lat: data.results[0].geometry.lat,
+    lon: data.results[0].geometry.lng,
+    display_name: data.results[0].formatted
+  };
 }
 
 async function fetchForecast(lat, lon) {
@@ -520,6 +544,6 @@ app.get("/api/files", (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
+console.log("API KEY:", process.env.GEOCODE_API_KEY);
 app.listen(PORT, "0.0.0.0", () => console.log(`Server running at http://0.0.0.0:${PORT}`));
 

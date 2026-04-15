@@ -26,7 +26,7 @@ app.set('views', path.join(__dirname, 'views'));
 
 const PORT = process.env.PORT||3000;
 const PVWATTS_API_KEY = process.env.PVWATTS_API_KEY;
-<<<<<<< HEAD
+
 // Writable output directory (Render's filesystem is read-only except /tmp)
 const OUTPUT_DIR = process.env.OUTPUT_DIR || path.join("/tmp", "quantum_public");
 // Ensure output directory exists and is served statically at /downloads
@@ -34,9 +34,9 @@ if (!fs.existsSync(OUTPUT_DIR)) {
   try { fs.mkdirSync(OUTPUT_DIR, { recursive: true }); } catch { /* noop */ }
 }
 app.use('/downloads', express.static(OUTPUT_DIR));
-=======
+
 const GEOCODE_API_KEY = process.env.GEOCODE_API_KEY;
->>>>>>> cfcd2d3 (Switched geocoding from Nominatim to OpenCage API and fixed API handling)
+
 
 // ----------------- helpers -----------------
 function deg2rad(d) {
